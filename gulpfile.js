@@ -2,7 +2,9 @@ const gulp = require("gulp"),
 	sourcemaps = require("gulp-sourcemaps"),
 	del = require('del'),
 	gulpTs = require('gulp-typescript'),
-	tsProject = gulpTs.createProject('tsconfig.json')
+	tsProject = gulpTs.createProject('tsconfig.json'),
+
+	mocha = require('gulp-mocha')
 ;
 
 const TS_FILES = [
@@ -58,9 +60,23 @@ exports.js = gulp.series(clearJs, js);
 
 
 
+function jsTest() {
+	return gulp.src(['test/**/*.js'], {read: false})
+		.pipe(mocha())
+	;
+}
+
+
+
+
+
 function watch() {
+	const watchFiles = [
+		'test/**/*js'
+	].concat(TS_FILES);
+
 	gulp.watch(
-		TS_FILES,
+		watchFiles,
 		{
 			ignoreInitial: false,
 			delay: 1000
@@ -85,5 +101,6 @@ const clear = gulp.series(clearJs),
 
 exports.clear = clear;
 exports.build = build;
+exports.test = jsTest;
 exports.watch = gulp.series(clear, watch);
 exports.default = build;

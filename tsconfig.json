@@ -8,6 +8,7 @@
 		"experimentalDecorators": false,
 		"forceConsistentCasingInFileNames": true,
 		"module": "commonjs",
+		"esModuleInterop": true,
 		"newLine": "LF",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
@@ -19,7 +20,8 @@
 		"types": [
 			"node",
 			"dotenv",
-			"node-fetch"
+			"node-fetch",
+			"promise.allsettled"
 		]
 	}
 }
