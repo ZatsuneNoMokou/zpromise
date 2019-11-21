@@ -1,0 +1,28 @@
+{
+  "name": "zpromise",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "dependencies": {
+    "del": "^4.1.1",
+    "dotenv": "^8.0.0",
+    "gulp": "4.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^5.0.1",
+    "node-fetch": "^2.6.0",
+    "typescript": "^3.5.1"
+  },
+  "scripts": {
+    "build": "gulp build",
+    "start": "node ./src/index.js",
+    "create": "./create-script.py"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node-fetch": "^2.3.4"
+  }
+}
