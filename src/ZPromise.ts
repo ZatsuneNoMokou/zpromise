@@ -46,6 +46,16 @@ class ZPromise<T> extends Promise<T> {
 		this.__reject(value);
 	}
 
+	/**
+	 *
+	 * @param ms Time in milliseconds
+	 */
+	static wait(ms:number):ZPromise<void> {
+		return new ZPromise<void>(resolve => {
+			setTimeout(resolve, ms);
+		})
+	}
+
 	static get allsettled() {
 		return allSettled;
 	}
