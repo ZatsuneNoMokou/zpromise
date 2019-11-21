@@ -27,15 +27,14 @@ class ZPromise<T> extends Promise<T> {
 
 		if (__resolve === null) {
 			throw 'Internal resolve is null'
-		} else {
-			this.__resolve = __resolve;
 		}
 
 		if (__reject === null) {
 			throw 'Internal reject is null'
-		} else {
-			this.__reject = __reject;
 		}
+
+		this.__resolve = __resolve;
+		this.__reject = __reject;
 	}
 
 	resolve(value: resolveValue<T>) {
