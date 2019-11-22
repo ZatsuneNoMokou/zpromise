@@ -178,7 +178,11 @@ describe('Queue', function () {
 
 	it('should enqueue function', function () {
 		const fn = Queue3.enqueuedFunction(function fn(i) {
-			return i + ' 100'
+			if (i % 2) {
+				return i + ' ' + 100;
+			} else {
+				throw i + ' ' + 100;
+			}
 		}, {
 			limit: 1
 		});
@@ -191,8 +195,8 @@ describe('Queue', function () {
 		const promise = Promise.all(promises);
 		return assert.eventually.deepEqual(promise, [
 			yes('1 100'),
-			yes('2 100'),
-			yes('3 100'),
+			no('2 100'),
+			no('3 100'),
 			yes('4 100')
 		])
 	});
