@@ -7,7 +7,6 @@
 		"declaration": true,
 		"experimentalDecorators": false,
 		"forceConsistentCasingInFileNames": true,
-		"module": "commonjs",
 		"esModuleInterop": true,
 		"newLine": "LF",
 		"noImplicitAny": true,

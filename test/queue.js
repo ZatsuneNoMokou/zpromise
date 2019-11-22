@@ -18,7 +18,7 @@ var no = function makeRejectedResult(reason) {
 
 
 describe('Queue', function () {
-	it('should take ~3s', function () {
+	it('should take ~3s with this autostart queue', function () {
 		const q = new Queue3({
 			'autostart': false,
 			'limit': 4

@@ -1,5 +1,7 @@
 .idea
 **/*.js
+**/*.cjs
+**/*.mjs
 !test/**/*.js
 **/*.d.ts
 **/*.map

@@ -32,6 +32,8 @@ function streamToPromise(stream) {
 function clearJs() {
 	return del([
 		'src/**/*.js',
+		'src/**/*.cjs',
+		'src/**/*.mjs',
 		'src/**/*.d.ts',
 		'src/**/*.map',
 	]);
@@ -54,6 +56,7 @@ function js() {
 		)
 	]);
 }
+
 exports.js = gulp.series(clearJs, js);
 
 
@@ -75,10 +78,10 @@ function watch() {
 		TS_FILES,
 		{
 			ignoreInitial: false,
-			delay: 1000
+			delay: 500
 		},
 		function jsNoDts() {
-			return  gulp.src(TS_FILES)
+			return gulp.src(TS_FILES)
 				.pipe(sourcemaps.init())
 				.pipe(tsProject()).js
 				.pipe(sourcemaps.write('.'))
