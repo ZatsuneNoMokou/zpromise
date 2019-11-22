@@ -84,7 +84,7 @@ class Queue3<T> {
 
 
 
-	static enqueuedFunction<T>(fn:Function, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>void {
+	static enqueuedFunction<T>(fn:Function, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
 		const _opts:Queue3_Options<T> = Object.assign({
 			'autostart': true,
 			'limit': 4,
@@ -95,8 +95,8 @@ class Queue3<T> {
 		_opts.autostart = true;
 
 		const queue = new Queue3(opts);
-		return function (...args:any) {
-			queue.enqueue.apply(queue, [fn, new Date().toISOString()].concat(args));
+		return function(...args:any):Promise<IResult<T>> {
+			return queue.enqueue.call(queue, fn, new Date().toISOString(), ...args);
 		}
 	}
 

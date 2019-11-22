@@ -96,14 +96,44 @@ describe('Queue', function () {
 
 	it('should autostart resolve', function () {
 		const q = new Queue3({
-			'autostart': true
+			'autostart': true,
+			limit: 0
 		});
 
-		const p = q.enqueue(function () {
-			return Promise.resolve(42)
-		}, '100ms');
+		const p = Promise.all([
+			q.enqueue(function () {
+				return Promise.resolve(42)
+			}, '100ms'),
+			q.enqueue(function () {
+				return Promise.resolve(21)
+			}, '100ms'),
+		]);
 
-		return assert.eventually.deepEqual(p, yes(42));
+		return assert.eventually.deepEqual(p, [
+			yes(42),
+			yes(21)
+		]);
+	});
+
+	it('should autostart resolve (limit: 1)', function () {
+		const q = new Queue3({
+			'autostart': true,
+			limit: 1
+		});
+
+		const p = Promise.all([
+			q.enqueue(function () {
+				return Promise.resolve(42)
+			}, '100ms'),
+			q.enqueue(function () {
+				return Promise.resolve(21)
+			}, '100ms'),
+		]);
+
+		return assert.eventually.deepEqual(p, [
+			yes(42),
+			yes(21)
+		]);
 	});
 
 	it('should autostart reject', function () {
@@ -144,6 +174,27 @@ describe('Queue', function () {
 		expectedMap.set(''+3, yes(3 + ' ' + 100));
 		expectedMap.set(''+4, yes(4 + ' ' + 100));
 		return assert.eventually.deepEqual(p, expectedMap);
+	});
+
+	it('should enqueue function', function () {
+		const fn = Queue3.enqueuedFunction(function fn(i) {
+			return i + ' 100'
+		}, {
+			limit: 1
+		});
+
+		const promises = [];
+		for (let i=1;i<5;i++) {
+			promises.push(fn(i));
+		}
+
+		const promise = Promise.all(promises);
+		return assert.eventually.deepEqual(promise, [
+			yes('1 100'),
+			yes('2 100'),
+			yes('3 100'),
+			yes('4 100')
+		])
 	});
 
 	/*(function () {
