@@ -1,7 +1,7 @@
 {
   "name": "zpromise",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "license": "MIT",
   "private": true,
   "engines": {
@@ -22,7 +22,6 @@
   },
   "scripts": {
     "build": "gulp build",
-    "start": "node ./src/index.js",
     "test": "gulp test"
   },
   "devDependencies": {
