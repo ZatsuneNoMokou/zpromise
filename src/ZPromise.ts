@@ -1,5 +1,6 @@
 // https://yarnpkg.com/fr/package/promise.allsettled
 import allSettled from 'promise.allsettled';
+import {PromiseResult, PromiseResolution, PromiseRejection} from "promise.allsettled/types";
 
 
 type resolveValue<T> = T | PromiseLike<T>;
@@ -55,13 +56,34 @@ class ZPromise<T> extends Promise<T> {
 		})
 	}
 
-	static get allsettled() {
-		return allSettled;
+	static allsettled<T>(iterable:Iterable<Promise<T>>):Promise<PromiseResult<T,any>[]> {
+		return allSettled.call(Promise, iterable);
+	}
+
+	static async waitAll<K,V>(promises:Map<K,Promise<V>>):Promise<Map<K,PromiseResult<V,any>>> {
+		const keys:K[] = [], values:Promise<V>[] = [];
+		for(let [key,value] of promises) {
+			keys.push(key);
+			values.push(value);
+		}
+
+		const result = await ZPromise.allsettled(values),
+			output:Map<K, PromiseResult<V,any>> = new Map()
+		;
+
+		result.forEach((value, index) => {
+			output.set(keys[index], value);
+		});
+
+		return output;
 	}
 }
 
 
 export {
-	ZPromise
+	ZPromise,
+	PromiseResult,
+	PromiseResolution,
+	PromiseRejection
 }
 export default ZPromise;
