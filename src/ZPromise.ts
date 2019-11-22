@@ -1,6 +1,6 @@
 // https://yarnpkg.com/fr/package/promise.allsettled
 import allSettled from 'promise.allsettled';
-import {PromiseResult, PromiseResolution, PromiseRejection} from "promise.allsettled/types";
+import {PromiseResult as IResult, PromiseResolution as ISuccess, PromiseRejection as IError} from "promise.allsettled/types";
 
 
 type resolveValue<T> = T | PromiseLike<T>;
@@ -56,11 +56,11 @@ class ZPromise<T> extends Promise<T> {
 		})
 	}
 
-	static allsettled<T>(iterable:Iterable<Promise<T>>):Promise<PromiseResult<T,any>[]> {
+	static allsettled<T>(iterable:Iterable<Promise<T>>):Promise<IResult<T,any>[]> {
 		return allSettled.call(Promise, iterable);
 	}
 
-	static async waitAll<K,V>(promises:Map<K,Promise<V>>):Promise<Map<K,PromiseResult<V,any>>> {
+	static async waitAll<K,V>(promises:Map<K,Promise<V>>):Promise<Map<K,IResult<V,any>>> {
 		const keys:K[] = [], values:Promise<V>[] = [];
 		for(let [key,value] of promises) {
 			keys.push(key);
@@ -68,7 +68,7 @@ class ZPromise<T> extends Promise<T> {
 		}
 
 		const result = await ZPromise.allsettled(values),
-			output:Map<K, PromiseResult<V,any>> = new Map()
+			output:Map<K, IResult<V,any>> = new Map()
 		;
 
 		result.forEach((value, index) => {
@@ -82,8 +82,8 @@ class ZPromise<T> extends Promise<T> {
 
 export {
 	ZPromise,
-	PromiseResult,
-	PromiseResolution,
-	PromiseRejection
+	IResult,
+	ISuccess,
+	IError
 }
 export default ZPromise;
