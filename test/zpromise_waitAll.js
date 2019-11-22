@@ -2,7 +2,7 @@ const chai = require("chai"),
 	chaiAsPromised = require("chai-as-promised")
 ;
 
-const { expect } = chai;
+const { assert } = chai;
 chai.use(chaiAsPromised);
 
 const {ZPromise} = require('../src/ZPromise');
@@ -31,9 +31,10 @@ describe('ZPromise.waitAll', function () {
 		expectedOutput.set('lorem', yes(a));
 		expectedOutput.set(true, yes(b));
 		expectedOutput.set(new Date(), yes(c));
-		return expect(
-			ZPromise.waitAll(map)
-		).to.eventually.deep.equal(expectedOutput);
+		return assert.eventually.deepEqual(
+			ZPromise.waitAll(map),
+			expectedOutput
+		);
 	});
 
 	it('all rejected', function () {
@@ -47,9 +48,10 @@ describe('ZPromise.waitAll', function () {
 		expectedOutput.set('lorem', no(a));
 		expectedOutput.set(true, no(b));
 		expectedOutput.set(new Date(), no(c));
-		return expect(
-			ZPromise.waitAll(map)
-		).to.eventually.deep.equal(expectedOutput);
+		return assert.eventually.deepEqual(
+			ZPromise.waitAll(map),
+			expectedOutput
+		);
 	});
 
 	it('mixed', function () {
@@ -64,16 +66,17 @@ describe('ZPromise.waitAll', function () {
 		expectedOutput.set('lorem', yes(a));
 		expectedOutput.set(true, yes(b));
 		expectedOutput.set(new Date(), no(c));
-		return expect(
+		return assert.eventually.deepEqual(
 			ZPromise.allSettled([
 				a,
 				ZPromise.resolve(b),
 				ZPromise.reject(c)
-			])
-		).to.eventually.deep.equal([
-			yes(a),
-			yes(b),
-			no(c)
-		]);
+			]),
+			[
+				yes(a),
+				yes(b),
+				no(c)
+			]
+		);
 	});
 });

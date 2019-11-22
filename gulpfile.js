@@ -71,12 +71,8 @@ function jsTest() {
 
 
 function watch() {
-	const watchFiles = [
-		'test/**/*js'
-	].concat(TS_FILES);
-
 	gulp.watch(
-		watchFiles,
+		TS_FILES,
 		{
 			ignoreInitial: false,
 			delay: 1000
