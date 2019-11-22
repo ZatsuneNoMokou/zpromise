@@ -19,6 +19,7 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "node-fetch": "^2.6.0",
+    "nyc": "^14.1.1",
     "promise.allsettled": "^1.0.1",
     "typescript": "^3.5.1"
   },

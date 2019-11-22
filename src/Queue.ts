@@ -108,6 +108,9 @@ class Queue3<T> {
 		if (typeof id !== 'string') {
 			throw 'id must be a string';
 		}
+		if (typeof fn !== 'function') {
+			throw 'fn must be a function';
+		}
 
 		const data = {'context': this, 'fn': fn, 'args': args};
 		this.queue.set(id, data);
@@ -410,11 +413,9 @@ class Queue3<T> {
 				throw e;
 			}
 
-			for (let id in promises) {
-				if (promises.hasOwnProperty(id)) {
-					this._promises.delete(id);
-				}
-			}
+			promises.forEach((v, id) => {
+				this._promises.delete(id);
+			});
 
 		} while (this._promises.size > 0);
 		this._running = false;
