@@ -1,5 +1,4 @@
-import { ZPromise, IResult, ISuccess, IError } from './ZPromise';
-
+import {IError, IResult, ISuccess, ZPromise} from './ZPromise';
 
 
 type onItemBegin_fn<T> = (id:string, data:runItem_data<T>) => void;
@@ -96,13 +95,7 @@ class Queue3<T> {
 
 		const queue = new Queue3(opts);
 		return function(...args:any):Promise<IResult<T>> {
-			const r = queue.enqueue(fn, new Date().toISOString(), ...args);
-
-			if (!(r instanceof Promise)) {
-				throw 'queue.enqueue did not return Promise';
-			}
-
-			return r;
+			return queue.enqueue(fn, new Date().toISOString(), ...args);
 		}
 	}
 
@@ -110,7 +103,7 @@ class Queue3<T> {
 
 
 
-	enqueue(fn:genericFunction<T>, id:string, ...args:any): Promise<IResult<T>> | void {
+	enqueue(fn:genericFunction<T>, id:string, ...args:any): Promise<IResult<T>> {
 		if (typeof id !== 'string') {
 			throw 'id must be a string';
 		}
@@ -158,8 +151,10 @@ class Queue3<T> {
 					;
 
 					return zPromise;
+				} else {
+					return newZPromise();
 				}
-			} else if(this._started === true) {
+			} else /*if(this._started === true)*/ {
 				let zPromise = newZPromise();
 
 				this.run()

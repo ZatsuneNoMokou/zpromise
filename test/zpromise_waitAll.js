@@ -38,14 +38,14 @@ describe('ZPromise.waitAll', function () {
 		const map = new Map();
 		map.set('lorem', Promise.resolve(a));
 		map.set(true, Promise.resolve(b));
-		map.set(new Date(), Promise.resolve(c));
+		map.set(new Date(1000000000000), Promise.resolve(c));
 
 
 
 		const expectedOutput = new Map();
 		expectedOutput.set('lorem', yes(a));
 		expectedOutput.set(true, yes(b));
-		expectedOutput.set(new Date(), yes(c));
+		expectedOutput.set(new Date(1000000000000), yes(c));
 		return assert.eventually.deepEqual(
 			ZPromise.waitAll(map),
 			expectedOutput

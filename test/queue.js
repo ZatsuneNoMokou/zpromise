@@ -114,6 +114,62 @@ describe('Queue', function () {
 		]);
 	});
 
+	it('should call onItemEnd on promise errors', function () {
+		let _resolve;
+		let queue = new Queue3({
+			'autostart': true,
+			'onItemEnd': function (id, data) {
+				_resolve([...arguments]);
+			}
+		});
+
+		const queueFn = function () {
+			return Promise.reject(42)
+		};
+
+		const p = new Promise(resolve => {
+			_resolve = resolve;
+
+			queue.enqueue(queueFn, 'queue.onItemEnd_onPromiseError');
+		});
+
+
+
+		return assert.eventually.deepEqual(p, [
+			'queue.onItemEnd_onPromiseError',
+			no(42),
+			[]
+		]);
+	});
+
+	it('should call onItemEnd on promise errors', function () {
+		let _resolve;
+		let queue = new Queue3({
+			'autostart': true,
+			'onItemEnd': function (id, data) {
+				_resolve([...arguments]);
+			}
+		});
+
+		const queueFn = function () {
+			throw 21
+		};
+
+		const p = new Promise(resolve => {
+			_resolve = resolve;
+
+			queue.enqueue(queueFn, 'queue.onItemEnd_onError');
+		});
+
+
+
+		return assert.eventually.deepEqual(p, [
+			'queue.onItemEnd_onError',
+			no(21),
+			[]
+		]);
+	});
+
 	it('should throw an already running', function () {
 		const q = new Queue3();
 		q.enqueue(function () {
