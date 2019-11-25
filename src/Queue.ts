@@ -288,7 +288,7 @@ class Queue3<T> {
 	private _loopedNext():Promise<boolean> {
 		const item = this.shift();
 
-		return new Promise<boolean>(resolve => {
+		return new Promise<boolean>((resolve, reject) => {
 			if (item === undefined) {
 				resolve(true);
 			} else {
@@ -309,14 +309,7 @@ class Queue3<T> {
 							this._result.set(id, data);
 						}
 					})
-					.catch((err:any) => {
-						if (this.autostart === false) {
-							this._result.set(id, {
-								status: 'rejected',
-								reason: err
-							});
-						}
-					})
+					.catch(reject)
 					.finally(() => {
 						this._loopedNext()
 							.then(resolve)
