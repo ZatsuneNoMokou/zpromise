@@ -45,7 +45,7 @@ class Queue3<T> {
 	private readonly _promises: Map<string, Promise<IResult<T>>>;
 	private readonly _loopPromises: Map<any, Promise<any>>;
 	private readonly _result: Map<string, IResult<T>>;
-	private readonly _delayedRun: Map<string, (itemPromise:Promise<IResult<T>>)=>void>;
+	private readonly _delayedRun: Map<string, ZPromise<IResult<T>>>;
 
 
 
@@ -121,7 +121,16 @@ class Queue3<T> {
 		const data = {'context': this, 'fn': fn, 'args': args};
 		this.queue.set(id, data);
 
-		let delayedRun:''|'_loopedNext'|'run'|null = null;
+
+
+		const newZPromise = () => {
+			const zPromise = new ZPromise<IResult<T>>();
+			this._delayedRun.set(id, zPromise);
+			return zPromise;
+		};
+
+
+
 		if (this.autostart === true) {
 			if (this._running === true) {
 				if (this.limit === 0) {
@@ -136,49 +145,31 @@ class Queue3<T> {
 						.catch(console.error)
 					;
 
-					this._promises.set(id, promise);
+					/*
+					 * IMPORTANT : We don't add the promise to this._promises or
+					 * if the run() is still running, it will generate a endless loop
+					 */
 					return promise;
 				} else if (this.limit !== this._promises.size) {
-					delayedRun = '_loopedNext';
-				}
-			} else if(this._started === true) {
-				delayedRun = 'run';
-			}
-		} else {
-			delayedRun = '';
-		}
+					let zPromise = newZPromise();
 
-		if (delayedRun !== null) {
-			const itemPromise = new Promise<IResult<T>>(resolve => {
-				const returnResult = (result: Promise<IResult<T>>) => {
-					result.then( data => {
-						resolve(data);
-					});
-
-					this._delayedRun.delete(id);
-				};
-
-				this._delayedRun.set(id, returnResult);
-			});
-
-			// noinspection FallThroughInSwitchStatementJS
-			switch (delayedRun) {
-				case 'run':
-					this.run()
-						.catch(console.error)
-					;
-				case '_loopedNext':
 					this._loopedNext()
 						.catch(console.error)
 					;
-					break;
-				case '':
-					break;
-				default:
-					throw 'UnkownType';
-			}
 
-			return itemPromise;
+					return zPromise;
+				}
+			} else if(this._started === true) {
+				let zPromise = newZPromise();
+
+				this.run()
+					.catch(console.error)
+				;
+
+				return zPromise;
+			}
+		} else {
+			return newZPromise();
 		}
 	}
 
@@ -231,58 +222,64 @@ class Queue3<T> {
 
 
 
-		return new Promise<IResult<T>>(resolve => {
-			let output:IResult<T> = <ISuccess<T>>{
-				status: 'fulfilled',
-				value: <T>{}
-			};
+		const delayedRun = this._delayedRun.get(id);
+		const zPromise:ZPromise<IResult<T>> = delayedRun !== undefined? delayedRun : new ZPromise<IResult<T>>();
+		this._delayedRun.delete(id);
 
-			let isErrored = false;
 
-			try {
-				output.value = fn.apply(context, args);
-			} catch (e) {
-				(<IResult<T>>output).status = 'rejected';
-				delete (<ISuccess<T>>output).value;
-				(<IError<any>><unknown>output).reason = e;
 
-				isErrored = true;
+		let output:IResult<T> = <ISuccess<T>>{
+			status: 'fulfilled',
+			value: <T>{}
+		};
+
+		let isErrored = false;
+
+		try {
+			output.value = fn.apply(context, args);
+		} catch (e) {
+			(<IResult<T>>output).status = 'rejected';
+			delete (<ISuccess<T>>output).value;
+			(<IError<any>><unknown>output).reason = e;
+
+			isErrored = true;
+		}
+
+
+
+		if (isErrored === false && output.value instanceof Promise) {
+			output.value
+				.then(data => {
+					output.status = 'fulfilled';
+					(<ISuccess<T>>output).value = data;
+
+					if (_onItemEnd !== undefined) {
+						_onItemEnd(output);
+					}
+
+					zPromise.resolve(output);
+				})
+				.catch(err => {
+					output.status = 'rejected';
+					delete (<ISuccess<T>>output).value;
+					(<IError<any>>output).reason = err;
+
+					if (_onItemEnd !== undefined) {
+						_onItemEnd(output);
+					}
+
+					zPromise.resolve(output)
+				})
+			;
+		} else {
+			if (_onItemEnd !== undefined) {
+				_onItemEnd(output);
 			}
 
+			zPromise.resolve(output);
+		}
 
-
-			if (isErrored === false && output.value instanceof Promise) {
-				output.value
-					.then(data => {
-						output.status = 'fulfilled';
-						(<ISuccess<T>>output).value = data;
-
-						if (_onItemEnd !== undefined) {
-							_onItemEnd(output);
-						}
-
-						resolve(output);
-					})
-					.catch(err => {
-						output.status = 'rejected';
-						delete (<ISuccess<T>>output).value;
-						(<IError<any>>output).reason = err;
-
-						if (_onItemEnd !== undefined) {
-							_onItemEnd(output);
-						}
-
-						resolve(output)
-					})
-				;
-			} else {
-				if (_onItemEnd !== undefined) {
-					_onItemEnd(output);
-				}
-
-				resolve(output);
-			}
-		})
+		return zPromise;
 	}
 
 	private _loopedNext():Promise<boolean> {
@@ -296,12 +293,6 @@ class Queue3<T> {
 
 				const itemPromise = this._runItem(id, data, this.onItemBegin, this.onItemEnd);
 
-				if (this._delayedRun.has(id)) {
-					const fn = this._delayedRun.get(id);
-					if (typeof fn === 'function') {
-						fn(itemPromise);
-					}
-				}
 
 				itemPromise
 					.then((data:IError<T>) => {

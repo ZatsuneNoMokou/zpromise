@@ -15,6 +15,10 @@ var no = function makeRejectedResult(reason) {
 	return { status: 'rejected', reason: reason };
 };
 
+var randomInt = function() {
+	return Math.floor(Math.random() * 100000)
+};
+
 
 
 describe('Queue', function () {
@@ -56,13 +60,13 @@ describe('Queue', function () {
 		const p = new Promise(resolve => {
 			_resolve = resolve;
 
-			queue.enqueue(queueFn, 'queue1');
+			queue.enqueue(queueFn, 'queue.onItemBegin');
 		});
 
 
 
 		return assert.eventually.deepEqual(p, [
-			'queue1',
+			'queue.onItemBegin',
 			{
 				'args': [],
 				'context': queue,
@@ -87,13 +91,13 @@ describe('Queue', function () {
 		const p = new Promise(resolve => {
 			_resolve = resolve;
 
-			queue.enqueue(queueFn, 'queue2');
+			queue.enqueue(queueFn, 'queue.onItemEnd');
 		});
 
 
 
 		return assert.eventually.deepEqual(p, [
-			'queue2',
+			'queue.onItemEnd',
 			yes(42),
 			[]
 		]);
@@ -162,10 +166,10 @@ describe('Queue', function () {
 		const p = Promise.all([
 			q.enqueue(function () {
 				return Promise.resolve(42)
-			}, '100ms'),
+			}, 'queue' + randomInt()),
 			q.enqueue(function () {
 				return Promise.resolve(21)
-			}, '100ms'),
+			}, 'queue' + randomInt()),
 		]);
 
 		return assert.eventually.deepEqual(p, [
@@ -183,10 +187,10 @@ describe('Queue', function () {
 		const p = Promise.all([
 			q.enqueue(function () {
 				return Promise.resolve(42)
-			}, '100ms'),
+			}, 'queue' + randomInt()),
 			q.enqueue(function () {
 				return Promise.resolve(21)
-			}, '100ms'),
+			}, 'queue' + randomInt()),
 		]);
 
 		return assert.eventually.deepEqual(p, [
