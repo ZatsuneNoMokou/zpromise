@@ -110,7 +110,7 @@ class Queue3<T> {
 
 
 
-	enqueue(fn:genericFunction<T>, id:string, ...args:any) {
+	enqueue(fn:genericFunction<T>, id:string, ...args:any): Promise<IResult<T>> | void {
 		if (typeof id !== 'string') {
 			throw 'id must be a string';
 		}
@@ -180,8 +180,6 @@ class Queue3<T> {
 
 			return itemPromise;
 		}
-
-		return this;
 	}
 
 	/**
