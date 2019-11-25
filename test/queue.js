@@ -176,7 +176,49 @@ describe('Queue', function () {
 		return assert.eventually.deepEqual(p, expectedMap);
 	});
 
-	it('should enqueue function', function () {
+	it('should enqueue function all resolve', function () {
+		const fn = Queue3.enqueuedFunction(function fn(i) {
+			return i + ' ' + 100;
+		}, {
+			limit: 1
+		});
+
+		const promises = [];
+		for (let i=1;i<5;i++) {
+			promises.push(fn(i));
+		}
+
+		const promise = Promise.all(promises);
+		return assert.eventually.deepEqual(promise, [
+			yes('1 100'),
+			yes('2 100'),
+			yes('3 100'),
+			yes('4 100')
+		])
+	});
+
+	it('should enqueue function all reject', function () {
+		const fn = Queue3.enqueuedFunction(function fn(i) {
+			throw i + ' ' + 100;
+		}, {
+			limit: 1
+		});
+
+		const promises = [];
+		for (let i=1;i<5;i++) {
+			promises.push(fn(i));
+		}
+
+		const promise = Promise.all(promises);
+		return assert.eventually.deepEqual(promise, [
+			no('1 100'),
+			no('2 100'),
+			no('3 100'),
+			no('4 100')
+		])
+	});
+
+	it('should enqueue function mixed results', function () {
 		const fn = Queue3.enqueuedFunction(function fn(i) {
 			if (i % 2) {
 				return i + ' ' + 100;
@@ -196,8 +238,8 @@ describe('Queue', function () {
 		return assert.eventually.deepEqual(promise, [
 			yes('1 100'),
 			no('2 100'),
-			no('3 100'),
-			yes('4 100')
+			yes('3 100'),
+			no('4 100')
 		])
 	});
 

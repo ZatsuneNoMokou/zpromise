@@ -84,7 +84,7 @@ class Queue3<T> {
 
 
 
-	static enqueuedFunction<T>(fn:Function, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
+	static enqueuedFunction<T>(fn:genericFunction<T>, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
 		const _opts:Queue3_Options<T> = Object.assign({
 			'autostart': true,
 			'limit': 4,
@@ -96,7 +96,13 @@ class Queue3<T> {
 
 		const queue = new Queue3(opts);
 		return function(...args:any):Promise<IResult<T>> {
-			return queue.enqueue.call(queue, fn, new Date().toISOString(), ...args);
+			const r = queue.enqueue(fn, new Date().toISOString(), ...args);
+
+			if (!(r instanceof Promise)) {
+				throw 'queue.enqueue did not return Promise';
+			}
+
+			return r;
 		}
 	}
 
@@ -238,10 +244,12 @@ class Queue3<T> {
 			try {
 				output.value = fn.apply(context, args);
 			} catch (e) {
+				(<IResult<T>>output).status = 'rejected';
+				delete (<ISuccess<T>>output).value;
+				(<IError<any>><unknown>output).reason = e;
+
 				isErrored = true;
-				console.error(e);
 			}
-			(<IResult<T>>output).status = isErrored === false? 'fulfilled' : 'rejected';
 
 
 
@@ -337,40 +345,6 @@ class Queue3<T> {
 
 
 		if(this.limit > 0) {
-			const next = () => {
-				const item = this.shift();
-
-				return new Promise(resolve => {
-					if (item === undefined) {
-						resolve(false);
-					} else {
-						const [id, data] = item;
-
-						this._runItem(id, data, this.onItemBegin, this.onItemEnd)
-							.then((data:IResult<T>) => {
-								if (this.autostart === false) {
-									this._result.set(id, data);
-								}
-							})
-							.catch((err:any) => {
-								if (this.autostart === false) {
-									this._result.set(id, {
-										status: 'rejected',
-										reason: err
-									});
-								}
-							})
-							.finally(() => {
-								next()
-									.then(resolve)
-									.catch(resolve)
-								;
-							})
-						;
-					}
-				})
-			};
-
 			for(let i = 1; i <= this.limit && i - 1 < this.queue.size; i++){
 				const promise = this._loopedNext();
 				this._loopPromises.set(`_${i}`, promise);
