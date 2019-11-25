@@ -40,6 +40,65 @@ describe('Queue', function () {
 		}, /fn must be a function/)
 	});
 
+	it('should call onItemBegin', function () {
+		let _resolve;
+		let queue = new Queue3({
+			'autostart': true,
+			'onItemBegin': function (id, data) {
+				_resolve([...arguments]);
+			}
+		});
+
+		const queueFn = function () {
+			return Promise.resolve(42)
+		};
+
+		const p = new Promise(resolve => {
+			_resolve = resolve;
+
+			queue.enqueue(queueFn, 'queue1');
+		});
+
+
+
+		return assert.eventually.deepEqual(p, [
+			'queue1',
+			{
+				'args': [],
+				'context': queue,
+				'fn': queueFn
+			}
+		]);
+	});
+
+	it('should call onItemEnd', function () {
+		let _resolve;
+		let queue = new Queue3({
+			'autostart': true,
+			'onItemEnd': function (id, data) {
+				_resolve([...arguments]);
+			}
+		});
+
+		const queueFn = function () {
+			return Promise.resolve(42)
+		};
+
+		const p = new Promise(resolve => {
+			_resolve = resolve;
+
+			queue.enqueue(queueFn, 'queue2');
+		});
+
+
+
+		return assert.eventually.deepEqual(p, [
+			'queue2',
+			yes(42),
+			[]
+		]);
+	});
+
 	it('should throw an already running', function () {
 		const q = new Queue3();
 		q.enqueue(function () {
