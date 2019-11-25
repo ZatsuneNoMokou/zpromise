@@ -152,7 +152,14 @@ class Queue3<T> {
 
 					return zPromise;
 				} else {
-					return newZPromise();
+					/**
+					 * If we're here, it mean that the number of promise(s)
+					 * is different from the number of the limit, that should
+					 * never happen by the way the limit is managed
+					 *
+					 * Having a throw here allow to not return an undefined in the method
+					 */
+					throw 'Autostart, and runnning with limit !== running promises';
 				}
 			} else /*if(this._started === true)*/ {
 				let zPromise = newZPromise();

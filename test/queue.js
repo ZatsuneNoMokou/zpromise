@@ -230,7 +230,7 @@ describe('Queue', function () {
 		);
 	});
 
-	it('should take ~300ms with this autostart queue', function () {
+	it('should take ~300ms with no-autostart queue', function () {
 		const q = new Queue3({
 			'autostart': false,
 			'limit': 4
@@ -274,6 +274,64 @@ describe('Queue', function () {
 		return assert.eventually.deepEqual(p, expectedResult);
 	});
 
+	it('should take with this autostart queue 2', function () {
+		const q = new Queue3({
+			'autostart': true,
+			'limit': 4
+		});
+
+		function fn(i) {
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					if (i % 2) {
+						resolve(i + ' ' + 100);
+					} else {
+						reject(i + ' ' + 100);
+					}
+				}, 100);
+			})
+		}
+
+		let promises = [];
+		for(let i = 1; i <= 4; i++) {
+			setTimeout(() => {
+				promises.push(q.enqueue(fn, i + ' ' + 100, i));
+			}, i * 100)
+		}
+
+		let p = new Promise((resolve, reject) => {
+			setTimeout(() => {
+				Promise.all(promises)
+					.then(resolve)
+					.catch(reject)
+				;
+			}, 5 * 100)
+		});
+
+
+
+
+
+		const expectedResult = new Map();
+		for(let i = 1; i <= 10; i++) {
+			if (i % 2) {
+				expectedResult.set(''+i, yes(i + ' ' + 100));
+			} else {
+				expectedResult.set(''+i, no(i + ' ' + 100));
+			}
+		}
+		this.timeout(3100);
+		return assert.eventually.deepEqual(
+			p,
+			[
+				yes('1 100'),
+				no('2 100'),
+				yes('3 100'),
+				no('4 100')
+			]
+		);
+	});
+
 	it('should autostart resolve', function () {
 		const q = new Queue3({
 			'autostart': true,
@@ -303,6 +361,9 @@ describe('Queue', function () {
 
 		const p = Promise.all([
 			q.enqueue(function () {
+				return Promise.resolve(84)
+			}, 'queue' + randomInt()),
+			q.enqueue(function () {
 				return Promise.resolve(42)
 			}, 'queue' + randomInt()),
 			q.enqueue(function () {
@@ -311,6 +372,7 @@ describe('Queue', function () {
 		]);
 
 		return assert.eventually.deepEqual(p, [
+			yes(84),
 			yes(42),
 			yes(21)
 		]);
