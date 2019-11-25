@@ -15,7 +15,7 @@ class ZPromise<T> extends Promise<T> {
 	private readonly __resolve: resolveFn<T>;
 	private readonly __reject: rejectFn<T>;
 
-	constructor(executor: executor<T>) {
+	constructor(executor?: executor<T>) {
 		let __resolve : resolveFn<T>|null = null,
 			__reject : rejectFn<T>|null = null
 		;
@@ -23,7 +23,10 @@ class ZPromise<T> extends Promise<T> {
 		super((resolve: resolveFn<T>, reject: rejectFn<T>) => {
 			__resolve = resolve;
 			__reject = reject;
-			return executor(resolve, reject);
+
+			if (executor != undefined) {
+				return executor(resolve, reject);
+			}
 		});
 
 		if (__resolve === null) {
