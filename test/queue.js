@@ -15,6 +15,17 @@ var no = function makeRejectedResult(reason) {
 	return { status: 'rejected', reason: reason };
 };
 
+var wrapForMap = function(promise, expectedValue) {
+	return [new Promise((resolve, reject) => {
+		promise
+			.then(data => {
+				resolve(Array.from(data.entries()))
+			})
+			.catch(reject)
+		;
+	}), Array.from(expectedValue.entries())];
+};
+
 var randomInt = function() {
 	return Math.floor(Math.random() * 100000)
 };
@@ -111,6 +122,56 @@ describe('Queue', function () {
 		const p = q.run();
 
 		return assert.isRejected(p, 'Already running');
+	});
+
+	it('should resolve with onItemBegin error', function () {
+		const q = new Queue3({
+			'autostart': false,
+			'limit': 4,
+			'onItemBegin': function () {
+				throw 'MyError'
+			}
+		});
+
+		q.enqueue(function () {
+			return Promise.resolve(42)
+		}, 'queue.onItemBeginError');
+
+
+		const p = q.run();
+		const expectedResult = new Map();
+		expectedResult.set("queue.onItemBeginError", yes(42));
+		return assert.eventually.deepEqual(
+			...wrapForMap(
+				p,
+				expectedResult
+			)
+		);
+	});
+
+	it('should resolve with onItemEnd error', function () {
+		const q = new Queue3({
+			'autostart': false,
+			'limit': 4,
+			'onItemEnd': function () {
+				throw 'MyError'
+			}
+		});
+
+		q.enqueue(function () {
+			return Promise.resolve(42)
+		}, 'queue.onItemEndError');
+
+
+		const p = q.run();
+		const expectedResult = new Map();
+		expectedResult.set("queue.onItemEndError", yes(42));
+		return assert.eventually.deepEqual(
+			...wrapForMap(
+				p,
+				expectedResult
+			)
+		);
 	});
 
 	it('should take ~300ms with this autostart queue', function () {
@@ -215,6 +276,34 @@ describe('Queue', function () {
 		const q = new Queue3({
 			'autostart': false,
 			'limit': 0
+		});
+
+
+		function fn(i) {
+			return new Promise(resolve => {
+				setTimeout(()=> {
+					resolve(i + ' ' + 100);
+				}, 100);
+			})
+		}
+		for (let i=1;i<5;i++) {
+			q.enqueue(fn, ''+i, i);
+		}
+		const p = q.run();
+
+		this.timeout(500);
+		const expectedMap = new Map();
+		expectedMap.set(''+1, yes(1 + ' ' + 100));
+		expectedMap.set(''+2, yes(2 + ' ' + 100));
+		expectedMap.set(''+3, yes(3 + ' ' + 100));
+		expectedMap.set(''+4, yes(4 + ' ' + 100));
+		return assert.eventually.deepEqual(p, expectedMap);
+	});
+
+	it('should not autostart and resolve (limit: 2)', function () {
+		const q = new Queue3({
+			'autostart': false,
+			'limit': 2
 		});
 
 

@@ -14,6 +14,21 @@ var no = function makeRejectedResult(reason) {
 	return { status: 'rejected', reason: reason };
 };
 
+var wrapForMap = function(promise, expectedValue) {
+	return [new Promise((resolve, reject) => {
+		promise
+			.then(data => {
+				resolve(Array.from(data.entries()))
+			})
+			.catch(reject)
+		;
+	}), Array.from(expectedValue.entries())];
+};
+
+
+
+
+
 describe('ZPromise.waitAll', function () {
 	var a = {a:Math.random()};
 	var b = {b:Math.random()};
@@ -41,16 +56,18 @@ describe('ZPromise.waitAll', function () {
 		const map = new Map();
 		map.set('lorem', Promise.reject(a));
 		map.set(true, Promise.reject(b));
-		map.set(new Date(), Promise.reject(c));
+		map.set(new Date(1000000000000), Promise.reject(c));
 
 
 		const expectedOutput = new Map();
 		expectedOutput.set('lorem', no(a));
 		expectedOutput.set(true, no(b));
-		expectedOutput.set(new Date(), no(c));
+		expectedOutput.set(new Date(1000000000000), no(c));
 		return assert.eventually.deepEqual(
-			ZPromise.waitAll(map),
-			expectedOutput
+			...wrapForMap(
+				ZPromise.waitAll(map),
+				expectedOutput
+			)
 		);
 	});
 
