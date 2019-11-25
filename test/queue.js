@@ -280,9 +280,9 @@ describe('Queue', function () {
 	it('should enqueue function mixed results', function () {
 		const fn = Queue3.enqueuedFunction(function fn(i) {
 			if (i % 2) {
-				return i + ' ' + 100;
+				return Promise.resolve(i + ' ' + 100);
 			} else {
-				throw i + ' ' + 100;
+				return Promise.reject(i + ' ' + 100);
 			}
 		}, {
 			limit: 1
