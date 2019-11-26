@@ -83,6 +83,10 @@ class Queue3<T> {
 
 
 
+	private static get _randomString():string {
+		return Math.random().toString(36).substring(2)
+	}
+
 	static enqueuedFunction<T>(fn:genericFunction<T>, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
 		const _opts:Queue3_Options<T> = Object.assign({
 			'autostart': true,
@@ -95,7 +99,7 @@ class Queue3<T> {
 
 		const queue = new Queue3(opts);
 		return function(...args:any):Promise<IResult<T>> {
-			return queue.enqueue(fn, new Date().toISOString(), ...args);
+			return queue.enqueue(fn, Queue3._randomString, ...args);
 		}
 	}
 
@@ -109,6 +113,9 @@ class Queue3<T> {
 		}
 		if (typeof fn !== 'function') {
 			throw 'fn must be a function';
+		}
+		if (this.queue.has(id)) {
+			throw `"${id}" already exist in the queue`;
 		}
 
 		const data = {'context': this, 'fn': fn, 'args': args};
@@ -143,7 +150,7 @@ class Queue3<T> {
 					 * if the run() is still running, it will generate a endless loop
 					 */
 					return promise;
-				} else if (this.limit !== this._promises.size) {
+				} else if (this.limit > this._loopPromises.size) {
 					let zPromise = newZPromise();
 
 					this._loopedNext()
@@ -152,16 +159,9 @@ class Queue3<T> {
 
 					return zPromise;
 				} else {
-					/**
-					 * If we're here, it mean that the number of promise(s)
-					 * is different from the number of the limit, that should
-					 * never happen by the way the limit is managed
-					 *
-					 * Having a throw here allow to not return an undefined in the method
-					 */
-					throw 'Autostart, and runnning with limit !== running promises';
+					return newZPromise();
 				}
-			} else /*if(this._started === true)*/ {
+			} else {
 				let zPromise = newZPromise();
 
 				this.run()

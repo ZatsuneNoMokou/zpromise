@@ -41,11 +41,25 @@ describe('Queue', function () {
 		}, /WrongArgument/, 'WrongArgument error');
 	});
 
-	it('should throw because id', function () {
+	it('should throw because id type', function () {
 		return assert.throws(function () {
 			const q = new Queue3();
 			q.enqueue()
 		}, /id must be a string/)
+	});
+
+	it('should throw because id duplicated', function () {
+		return assert.throws(function () {
+			const q = new Queue3({
+					autostart: false
+				}),
+				noop = () => {}
+			;
+
+			q.enqueue(noop, 'duplicatedId');
+			q.enqueue(noop, 'duplicatedId');
+
+		}, /"duplicatedId" already exist in the queue/)
 	});
 
 	it('should throw because fn', function () {
