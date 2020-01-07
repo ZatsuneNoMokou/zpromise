@@ -65,7 +65,11 @@ exports.js = gulp.series(clearJs, js);
 
 function jsTest() {
 	return gulp.src(['test/**/*.js'], {read: false})
-		.pipe(mocha())
+		.pipe(mocha({
+			require: [
+				'esm'
+			]
+		}))
 	;
 }
 
