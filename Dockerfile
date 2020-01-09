@@ -1,13 +1,16 @@
 FROM node:lts-alpine
 
+ENV YARN_VERSION=latest
+
+
 # Install yarn
 # libc6-compat => in case of `process.dlopen`
-apk add --no-cache libc6-compat yarn
+RUN apk add --no-cache libc6-compat bash gnupg && touch $HOME/.profile && curl -o- -L https://yarnpkg.com/install.sh | bash
 
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
 
-WORKDIR /usr/src/app
+WORKDIR /app
 COPY package.json .
 RUN yarn install
 RUN yarn build
