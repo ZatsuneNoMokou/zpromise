@@ -1,5 +1,6 @@
 /.idea
 **/*.ts
+!**/*.d.ts
 /CHANGELOG
 /LICENSE
 /README.md
