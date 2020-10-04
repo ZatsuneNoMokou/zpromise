@@ -365,11 +365,7 @@ class Queue3<T> {
 
 
 		do {
-			try {
-				promises = await ZPromise.waitAll<any,any>(this._loopPromises);
-			} catch (e) {
-				throw e;
-			}
+			promises = await ZPromise.waitAll<any,any>(this._loopPromises);
 
 			promises.forEach((v, id) => {
 				this._promises.delete(id);

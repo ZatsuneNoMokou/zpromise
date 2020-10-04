@@ -1,3 +1,4 @@
+require = require("esm")(module);
 const chai = require('chai'),
 	chaiAsPromised = require("chai-as-promised"),
 	{ZPromise} = require('../src/ZPromise'),

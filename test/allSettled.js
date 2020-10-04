@@ -1,3 +1,4 @@
+require = require("esm")(module)
 const chai = require("chai"),
 	chaiAsPromised = require("chai-as-promised")
 ;
@@ -20,7 +21,7 @@ describe('ZPromise.allSettled', function () {
 	var c = {};
 
 	it('should be a function', function () {
-		assert.strictEqual(typeof ZPromise.allsettled, 'function')
+		assert.strictEqual(typeof ZPromise.allSettled, 'function')
 	});
 
 	it('all fulfilled', function () {
