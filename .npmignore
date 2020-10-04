@@ -1,5 +1,7 @@
-/.idea
 **/*.ts
+!**/*.d.ts
+!yarn.lock
+/.idea
 /CHANGELOG
 /LICENSE
 /README.md
