@@ -1,6 +1,4 @@
-// https://yarnpkg.com/fr/package/promise.allsettled
-import allSettled from 'promise.allsettled';
-import {PromiseResult as IResult, PromiseResolution as ISuccess, PromiseRejection as IError} from "promise.allsettled/types";
+import {PromiseResult as IResult, PromiseResolution as ISuccess, PromiseRejection as IError} from "promise.allsettled";
 
 
 type resolveValue<T> = T | PromiseLike<T>;
@@ -59,10 +57,6 @@ class ZPromise<T> extends Promise<T> {
 		})
 	}
 
-	static allsettled<T>(iterable:Iterable<Promise<T>>):Promise<IResult<T,any>[]> {
-		return allSettled.call(Promise, iterable);
-	}
-
 	static async waitAll<K,V>(promises:Map<K,Promise<V>>):Promise<Map<K,IResult<V,any>>> {
 		const keys:K[] = [], values:Promise<V>[] = [];
 		for(let [key,value] of promises) {
@@ -70,7 +64,7 @@ class ZPromise<T> extends Promise<T> {
 			values.push(value);
 		}
 
-		const result = await ZPromise.allsettled(values),
+		const result = await Promise.allSettled(values),
 			output:Map<K, IResult<V,any>> = new Map()
 		;
 
