@@ -1,6 +1,6 @@
 {
   "name": "@zatsunenomokou/zpromise",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
   "license": "MIT",
   "types": "module",
@@ -13,8 +13,8 @@
     "test:coverage": "nyc --require esm yarn test"
   },
   "devDependencies": {
-    "@types/node": "^14.11.2",
     "@types/dotenv": "^8.2.0",
+    "@types/node": "^14.11.2",
     "@types/node-fetch": "^2.5.7",
     "@types/promise.allsettled": "^1.0.2",
     "chai": "^4.2.0",
