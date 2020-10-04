@@ -3,6 +3,12 @@
 /CHANGELOG
 /LICENSE
 /README.md
+/test
+/Dockerfile
+/gulpfile.js
+/tsconfig.json
+.nycrc.json
+.gitignore
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
