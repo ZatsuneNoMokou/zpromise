@@ -2,8 +2,9 @@
   "name": "@zatsunenomokou/zpromise",
   "version": "1.0.1",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "license": "MIT",
-  "types": "module",
+  "type": "module",
   "engines": {
     "node": ">=12.0.0"
   },
