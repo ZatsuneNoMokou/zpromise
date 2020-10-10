@@ -1,10 +1,9 @@
 {
   "name": "@zatsunenomokou/zpromise",
-  "version": "1.0.2",
-  "main": "src/index.js",
+  "version": "1.0.3",
+  "main": "src/index.mjs",
   "types": "src/index.d.ts",
   "license": "MIT",
-  "type": "module",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -13,11 +12,14 @@
     "test": "gulp test",
     "test:coverage": "nyc --require esm yarn test"
   },
+  "dependencies": {
+    "promise.allsettled": "^1.0.2",
+    "@types/promise.allsettled": "^1.0.2"
+  },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/node": "^14.11.2",
     "@types/node-fetch": "^2.5.7",
-    "@types/promise.allsettled": "^1.0.2",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "del": "^6.0.0",
@@ -25,11 +27,12 @@
     "esm": "^3.2.25",
     "gulp": "^4.0.2",
     "gulp-mocha": "^7.0.2",
+    "gulp-rename": "^2.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "node-fetch": "^2.6.0",
     "nyc": "^15.0.0",
-    "typescript": "^3.5.1"
+    "typescript": "^3.9.7"
   },
   "resolutions": {
     "**/mocha": "^8.1.3"

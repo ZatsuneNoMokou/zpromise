@@ -1,7 +1,9 @@
 const gulp = require("gulp"),
+	path = require("path"),
 	sourcemaps = require("gulp-sourcemaps"),
 	del = require('del'),
 	gulpTs = require('gulp-typescript'),
+	gulpRename = require('gulp-rename'),
 	tsProject = gulpTs.createProject('tsconfig.json'),
 
 	mocha = require('gulp-mocha')
@@ -51,6 +53,9 @@ function js() {
 		),
 		streamToPromise(
 			tsResult.js
+				.pipe(gulpRename(path => {
+					path.extname = ".mjs";
+				}))
 				.pipe(sourcemaps.write('.'))
 				.pipe(gulp.dest('src'))
 		)
@@ -65,11 +70,7 @@ exports.js = gulp.series(clearJs, js);
 
 function jsTest() {
 	return gulp.src(['test/**/*.js'], {read: false})
-		.pipe(mocha({
-			require: [
-				'esm'
-			]
-		}))
+		.pipe(mocha())
 	;
 }
 

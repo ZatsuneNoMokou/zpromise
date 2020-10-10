@@ -1,4 +1,5 @@
 import {PromiseResult as IResult, PromiseResolution as ISuccess, PromiseRejection as IError} from "promise.allsettled";
+import allSettled from "promise.allsettled";
 
 
 type resolveValue<T> = T | PromiseLike<T>;
@@ -57,15 +58,15 @@ class ZPromise<T> extends Promise<T> {
 		})
 	}
 
-	static async waitAll<K,V>(promises:Map<K,Promise<V>>):Promise<Map<K,IResult<V,any>>> {
-		const keys:K[] = [], values:Promise<V>[] = [];
-		for(let [key,value] of promises) {
+	static async waitAll<K, V>(promises: Map<K, Promise<V>>): Promise<Map<K, IResult<V, any>>> {
+		const keys: K[] = [], values: Promise<V>[] = [];
+		for (let [key, value] of promises) {
 			keys.push(key);
 			values.push(value);
 		}
 
-		const result = await Promise.allSettled(values),
-			output:Map<K, IResult<V,any>> = new Map()
+		const result = await allSettled(values),
+			output: Map<K, IResult<V, any>> = new Map()
 		;
 
 		result.forEach((value, index) => {
