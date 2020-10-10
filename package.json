@@ -1,6 +1,6 @@
 {
   "name": "@zatsunenomokou/zpromise",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "src/index.mjs",
   "types": "src/index.d.ts",
   "license": "MIT",
