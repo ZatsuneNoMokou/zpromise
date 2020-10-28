@@ -22,9 +22,9 @@ interface Queue3_enqueueArgumentsOptions<T> {
 	onItemEnd?: onItemEnd_fn<T>
 }
 
-type genericFunction<T> = (...args: any[]) => T;
+export type IGenericFunction<T> = (...args: any[]) => T|Promise<T>;
 interface runItem_data<T> {
-	fn: genericFunction<T>;
+	fn: IGenericFunction<T>;
 	context: any;
 	args: any;
 }
@@ -87,7 +87,7 @@ class Queue3<T> {
 		return Math.random().toString(36).substring(2)
 	}
 
-	static enqueuedFunction<T>(fn:genericFunction<T>, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
+	static enqueuedFunction<T>(fn:IGenericFunction<T>, opts:Queue3_enqueueArgumentsOptions<T>={}):(...args:any)=>Promise<IResult<T>> {
 		const _opts:Queue3_Options<T> = Object.assign({
 			'autostart': true,
 			'limit': 4,
@@ -107,7 +107,7 @@ class Queue3<T> {
 
 
 
-	enqueue(fn:genericFunction<T>, id:string, ...args:any): Promise<IResult<T>> {
+	enqueue(fn:IGenericFunction<T>, id:string, ...args:any): Promise<IResult<T>> {
 		if (typeof id !== 'string') {
 			throw 'id must be a string';
 		}
