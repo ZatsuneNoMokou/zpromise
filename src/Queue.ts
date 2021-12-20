@@ -1,5 +1,8 @@
-import {IError, IResult, ISuccess, ZPromise} from './ZPromise';
+import {ZPromise} from './ZPromise';
 
+type IResult<T> = PromiseSettledResult<T>;
+type ISuccess<T> = PromiseFulfilledResult<T>;
+type IError = PromiseRejectedResult;
 
 type onItemBegin_fn<T> = (id:string, data:runItem_data<T>) => void;
 type onItemEnd_fn<T> = (id:string, data:IResult<T>) => void;
@@ -242,7 +245,7 @@ class Queue3<T> {
 		} catch (e) {
 			(<IResult<T>>output).status = 'rejected';
 			delete (<ISuccess<T>>output).value;
-			(<IError<any>><unknown>output).reason = e;
+			(<IError><unknown>output).reason = e;
 
 			isErrored = true;
 		}
@@ -264,7 +267,7 @@ class Queue3<T> {
 				.catch(err => {
 					output.status = 'rejected';
 					delete (<ISuccess<T>>output).value;
-					(<IError<any>>output).reason = err;
+					(<IError>output).reason = err;
 
 					if (_onItemEnd !== undefined) {
 						_onItemEnd(output);
@@ -297,7 +300,7 @@ class Queue3<T> {
 
 
 				itemPromise
-					.then((data:IError<T>) => {
+					.then((data:IError) => {
 						if (this.autostart === false) {
 							this._result.set(id, data);
 						}
