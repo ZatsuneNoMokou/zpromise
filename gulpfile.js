@@ -53,9 +53,9 @@ function js() {
 		),
 		streamToPromise(
 			tsResult.js
-				.pipe(gulpRename(path => {
+				/*.pipe(gulpRename(path => {
 					path.extname = ".mjs";
-				}))
+				}))*/
 				.pipe(sourcemaps.write('.'))
 				.pipe(gulp.dest('src'))
 		)
