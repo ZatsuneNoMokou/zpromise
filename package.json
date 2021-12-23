@@ -1,11 +1,12 @@
 {
   "name": "@zatsunenomokou/zpromise",
   "version": "1.0.7",
-  "main": "src/index.mjs",
+  "main": "src/index.js",
   "files": [
-    "src/Queue.mjs",
-    "src/ZPromise.mjs"
+    "src/Queue.js",
+    "src/ZPromise.js"
   ],
+  "type": "module",
   "types": "src/index.d.ts",
   "license": "MIT",
   "engines": {
