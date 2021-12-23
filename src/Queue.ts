@@ -1,4 +1,4 @@
-import {ZPromise} from './ZPromise';
+import {ZPromise} from './ZPromise.mjs';
 
 type IResult<T> = PromiseSettledResult<T>;
 type ISuccess<T> = PromiseFulfilledResult<T>;
