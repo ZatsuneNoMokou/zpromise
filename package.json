@@ -2,6 +2,10 @@
   "name": "@zatsunenomokou/zpromise",
   "version": "1.0.6",
   "main": "src/index.mjs",
+  "files": [
+    "src/Queue.mjs",
+    "src/ZPromise.mjs"
+  ],
   "types": "src/index.d.ts",
   "license": "MIT",
   "engines": {
