@@ -1,12 +1,9 @@
-require = require("esm")(module)
-const chai = require("chai"),
-	chaiAsPromised = require("chai-as-promised")
-;
+import chai, { expect, assert } from "chai";
+import chaiAsPromised from "chai-as-promised";
+import {ZPromise} from "../src/ZPromise.js";
 
-const { expect, assert } = chai;
 chai.use(chaiAsPromised);
 
-const {ZPromise} = require('../src/ZPromise');
 
 var yes = function makeFulfilledResult(value) {
 	return { status: 'fulfilled', value: value };

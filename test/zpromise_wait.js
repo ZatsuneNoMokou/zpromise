@@ -1,12 +1,8 @@
-require = require("esm")(module);
-const chai = require('chai'),
-	chaiAsPromised = require("chai-as-promised"),
-	{ZPromise} = require('../src/ZPromise'),
+import chai, {assert} from "chai";
+import chaiAsPromised from "chai-as-promised";
+import {ZPromise} from "../src/ZPromise.js";
 
-	NS_PER_SEC = 1e9
-;
-
-const { assert } = chai;
+const NS_PER_SEC = 1e9;
 chai.use(chaiAsPromised);
 
 describe('ZPromise.wait', function () {

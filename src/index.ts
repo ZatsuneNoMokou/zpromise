@@ -1,2 +1,2 @@
-export * from './ZPromise';
-export * from './Queue';
+export * from './ZPromise.js';
+export * from './Queue.js';

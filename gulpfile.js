@@ -1,14 +1,10 @@
-const gulp = require("gulp"),
-	path = require("path"),
-	sourcemaps = require("gulp-sourcemaps"),
-	del = require('del'),
-	gulpTs = require('gulp-typescript'),
-	gulpRename = require('gulp-rename'),
-	tsProject = gulpTs.createProject('tsconfig.json'),
+import gulp from "gulp";
+import sourcemaps from "gulp-sourcemaps";
+import del from "del";
+import gulpTs from "gulp-typescript";
+import mocha from "gulp-mocha";
 
-	mocha = require('gulp-mocha')
-;
-
+const tsProject = gulpTs.createProject('tsconfig.json');
 const TS_FILES = [
 	'src/**/*.ts',
 	'!src/**/*.d.ts',
@@ -41,7 +37,7 @@ function clearJs() {
 	]);
 }
 
-function js() {
+function _js() {
 	const tsResult = gulp.src(TS_FILES)
 		.pipe(sourcemaps.init())
 		.pipe(tsProject())
@@ -62,7 +58,7 @@ function js() {
 	]);
 }
 
-exports.js = gulp.series(clearJs, js);
+export const js = gulp.series(clearJs, _js);
 
 
 
@@ -78,7 +74,7 @@ function jsTest() {
 
 
 
-function watch() {
+function _watch() {
 	gulp.watch(
 		TS_FILES,
 		{
@@ -99,12 +95,8 @@ function watch() {
 
 
 
-const clear = gulp.series(clearJs),
-	build = gulp.series(clear, js)
-;
-
-exports.clear = clear;
-exports.build = build;
-exports.test = jsTest;
-exports.watch = gulp.series(clear, watch);
-exports.default = build;
+export const clear = gulp.series(clearJs);
+export const build = gulp.series(clear, _js);
+export const test = jsTest;
+export const watch = gulp.series(clear, _watch);
+export default build;
