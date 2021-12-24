@@ -1,10 +1,7 @@
-require = require("esm")(module);
-const chai = require('chai'),
-	chaiAsPromised = require("chai-as-promised"),
-	{ZPromise} = require('../src/ZPromise')
-;
+import chai, {assert} from "chai";
+import chaiAsPromised from "chai-as-promised";
+import {ZPromise} from "../src/ZPromise.js";
 
-const assert = chai.assert;
 chai.use(chaiAsPromised);
 
 describe('ZPromise.resolve', function () {
