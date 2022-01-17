@@ -1,5 +1,15 @@
 {
-	"exclude": [
-		"gulpfile.js"
-	]
+	"include": [
+		"src/*.js",
+		"src/*.ts"
+	],
+	"reporter": [
+		"html",
+		"text"
+	],
+	"report-dir": "./coverage",
+	"temp-directory": "./.nyc_output",
+	"lines": 95,
+	"branches": "82",
+	"statements": "95"
 }

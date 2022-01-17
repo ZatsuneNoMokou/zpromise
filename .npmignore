@@ -7,7 +7,6 @@
 /README.md
 /test
 /Dockerfile
-/gulpfile.js
 /tsconfig.json
 .nycrc.json
 .gitignore
