@@ -1,5 +1,5 @@
 type resolveValue<T> = T | PromiseLike<T>;
-type resolveFn<T> = (value?: resolveValue<T>) => void;
+type resolveFn<T> = (value: resolveValue<T>) => void;
 
 type rejectValue<T> = any;
 type rejectFn<T> = (reason?: rejectValue<T>) => void;
@@ -24,10 +24,12 @@ class ZPromise<T> extends Promise<T> {
 			}
 		});
 
+		/* c8 ignore next 3 */
 		if (__resolve === null) {
 			throw 'Internal resolve is null'
 		}
 
+		/* c8 ignore next 3 */
 		if (__reject === null) {
 			throw 'Internal reject is null'
 		}
