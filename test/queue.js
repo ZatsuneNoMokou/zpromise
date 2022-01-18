@@ -203,14 +203,7 @@ describe('Queue', function () {
 			return Promise.reject(42)
 		}, '100ms');
 
-		let error;
-		try {
-			await p;
-		} catch (e) {
-			error = e;
-		}
-
-		return assert.deepEqual(error, no(42));
+		return assert.deepEqual(await p, no(42));
 	});
 
 	it('should not autostart and resolve', function () {
@@ -334,6 +327,105 @@ describe('Queue', function () {
 				return val.value ?? val.reason
 			}))
 		;
+		return assert.eventually.deepEqual(promise, [
+			yes('1 100'),
+			no('2 100'),
+			yes('3 100'),
+			no('4 100')
+		])
+	});
+
+	it('should throw runFunction with incorrect data', function () {
+		const promise = Queue.runFunction(() => {});
+		return assert.isRejected(promise, /WrongType "data"/);
+	});
+
+	it('should runFunction all resolve', function () {
+		const promise = Queue.runFunction(function fn(i) {
+			return i + ' ' + 100;
+		}, [
+			[1],
+			[2],
+			[3],
+			[4]
+		], 1);
+
+		return assert.eventually.deepEqual(promise, [
+			yes('1 100'),
+			yes('2 100'),
+			yes('3 100'),
+			yes('4 100')
+		])
+	});
+
+	it('should runFunction with Map and all resolve', function () {
+		const data = new Map();
+		for (let i=1; i <= 4; i++) {
+			data.set(i.toString(), [i]);
+		}
+
+		const promise = Queue.runFunction(function fn(i) {
+			return i + ' ' + 100;
+		}, data, 1);
+
+		return assert.eventually.deepEqual(promise, new Map([
+			['1', yes('1 100')],
+			['2', yes('2 100')],
+			['3', yes('3 100')],
+			['4', yes('4 100')]
+		]))
+	});
+
+	it('should runFunction all reject', function () {
+		const promise = Queue.runFunction(function fn(i) {
+			return Promise.reject(i + ' ' + 100);
+		}, [
+			[1],
+			[2],
+			[3],
+			[4]
+		], 1);
+
+		return assert.eventually.deepEqual(promise, [
+			no('1 100'),
+			no('2 100'),
+			no('3 100'),
+			no('4 100')
+		])
+	});
+
+	it('should runFunction with Map and all reject', function () {
+		const data = new Map();
+		for (let i=1; i <= 4; i++) {
+			data.set(i.toString(), [i]);
+		}
+
+		const promise = Queue.runFunction(function fn(i) {
+			return Promise.reject(i + ' ' + 100);
+		}, data, 1);
+
+		return assert.eventually.deepEqual(promise, new Map([
+			['1', no('1 100')],
+			['2', no('2 100')],
+			['3', no('3 100')],
+			['4', no('4 100')]
+		]))
+	});
+
+	it('should runFunction mixed results', function () {
+		const promise = Queue.runFunction(function fn(i) {
+			if (i % 2) {
+				return Promise.resolve(i + ' ' + 100);
+			} else {
+				return Promise.reject(i + ' ' + 100);
+			}
+		}, [
+			[1],
+			[2],
+			[3],
+			[4]
+		], 1);
+
 		return assert.eventually.deepEqual(promise, [
 			yes('1 100'),
 			no('2 100'),

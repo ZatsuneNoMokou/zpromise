@@ -6,11 +6,11 @@ interface Queue3_Options<T> {
 	limit: number
 }
 
-export type IGenericFunction<T> = (...args: any[]) => T|Promise<T>;
-interface runItem_data<T> {
-	fn: IGenericFunction<T>;
-	context: any;
-	args: any;
+export type IGenericFunction<Arguments extends unknown[], T> = (...args: Arguments) => T|Promise<T>;
+interface runItem_data<Arguments extends unknown[], T> {
+	fn: IGenericFunction<Arguments, T>;
+	context: unknown;
+	args: Arguments;
 }
 
 
@@ -22,7 +22,7 @@ export class Queue<T> {
 	private readonly _pLimit:LimitFunction;
 	private readonly _delayedRun: {
 		zPromise: ZPromise<PromiseSettledResult<T>>
-		data: runItem_data<T>
+		data: runItem_data<unknown[], T>
 	}[] = [];
 
 
@@ -45,23 +45,23 @@ export class Queue<T> {
 	}
 
 
-	static enqueuedFunction<T>(fn:IGenericFunction<T>, queueLimit:number = 4):(...args:any) => Promise<PromiseSettledResult<T>> {
+	static enqueuedFunction<Arguments extends unknown[], T>(fn:IGenericFunction<Arguments, T>, queueLimit:number = 4):(...args:Arguments) => Promise<PromiseSettledResult<T>> {
 		const queue = new Queue<T>({
 			autostart: true,
 			limit: queueLimit
 		});
-		return function<T>(...args:any) {
+		return function<T>(...args:Arguments) {
 			return queue.enqueue(fn, ...args);
 		}
 	}
 
 
-	enqueue(fn:IGenericFunction<T>, ...args:any): Promise<PromiseSettledResult<T>> {
+	enqueue<Arguments extends unknown[]>(fn:IGenericFunction<Arguments, T>, ...args:Arguments): Promise<PromiseSettledResult<T>> {
 		if (typeof fn !== 'function') {
 			throw 'fn must be a function';
 		}
 
-		const data:runItem_data<T> = {
+		const data:runItem_data<Arguments, T> = {
 			'context': this,
 			'fn': fn,
 			'args': args
@@ -80,12 +80,66 @@ export class Queue<T> {
 		}
 	}
 
-	private async _runItem<T>(data:runItem_data<T>): Promise<T> {
+	static async runFunction<Arguments extends unknown[], T>(fn:IGenericFunction<Arguments, T>, data:Arguments[], queueLimit: number):Promise<PromiseSettledResult<T>[]>
+	static async runFunction<Arguments extends unknown[], T>(fn:IGenericFunction<Arguments, T>, data:Map<string, Arguments>, queueLimit: number):Promise<Map<string, PromiseSettledResult<T>>>
+	static async runFunction<Arguments extends unknown[], T>(
+		fn:IGenericFunction<Arguments, T>,
+		data:Map<string, Arguments>|Arguments[], queueLimit: number = 4
+	):Promise<PromiseSettledResult<T>[] | Map<string, PromiseSettledResult<T>>> {
+		if (!Array.isArray(data) && !(<any>data instanceof Map)) {
+			throw new Error('WrongType "data"')
+		}
+
+		const enqueuedFn = Queue.enqueuedFunction(fn, queueLimit),
+
+			output = Array.isArray(data) ?
+				<PromiseSettledResult<T>[]>[]
+				:
+				new Map<string, PromiseSettledResult<T>>(),
+
+			promises = Array.isArray(data) ?
+				<Promise<PromiseSettledResult<T>>[]>[]
+				:
+				new Map<string, Promise<PromiseSettledResult<T>>>()
+		;
+
+		// Enqueue all data without waiting result
+		for (let [id, args] of data.entries()) {
+			const promise = enqueuedFn(...args);
+			if (Array.isArray(promises)) {
+				promises.push(promise)
+			} else {
+				promises.set(id.toString(), promise);
+			}
+		}
+
+		// Wait now for the result, promise by promise to keep the order
+		for (let [id, promise] of promises.entries()) {
+			let promiseResult:PromiseSettledResult<T>;
+			try {
+				promiseResult = await promise;
+				/* c8 ignore next 3 */
+			} catch (e) {
+				throw e;
+			}
+
+			if (Array.isArray(output)) {
+				output.push(promiseResult);
+			} else {
+				output.set(id.toString(), promiseResult);
+			}
+		}
+
+		return output;
+	}
+
+
+	private async _runItem<Argument extends unknown[], T>(data:runItem_data<Argument, T>): Promise<T> {
 		return this._pLimit.call(data.context, data.fn, ...data.args);
 	}
 
 	private static _promiseToSettledResult<T>(promise:Promise<T>): Promise<PromiseSettledResult<T>> {
-		return new Promise<PromiseSettledResult<T>>((resolve, reject) => {
+		return new Promise<PromiseSettledResult<T>>(resolve => {
 			promise
 				.then(value => {
 					resolve({
@@ -94,7 +148,7 @@ export class Queue<T> {
 					});
 				})
 				.catch(reason => {
-					reject({
+					resolve({
 						status: "rejected",
 						reason
 					})
@@ -113,29 +167,33 @@ export class Queue<T> {
 		this._running = true;
 
 
-		const promises : Promise<PromiseSettledResult<T>>[] = [],
+		const promises : {
+			index: number,
+			promise: Promise<PromiseSettledResult<T>>,
+			zPromise: ZPromise<PromiseSettledResult<T>>
+		}[] = [],
 			output : PromiseSettledResult<T>[] = []
 		;
 		for (let [index, {data, zPromise}] of this._delayedRun.entries()) {
-			Queue._promiseToSettledResult(this._runItem(data))
-				.then(value => {
-					zPromise.resolve(value);
-					output[index] = value;
-				})
-				.catch(reason => {
-					zPromise.reject(reason);
-					output[index] = reason;
-				})
-			;
-
-			promises.push(zPromise);
+			const promise = Queue._promiseToSettledResult(this._runItem(data));
+			promises.push({
+				index,
+				promise,
+				zPromise
+			});
 		}
 
-		return new Promise<PromiseSettledResult<T>[] | void>(async resolve => {
-			for (let promise of promises) {
+		return new Promise<PromiseSettledResult<T>[] | void>(async (resolve, reject) => {
+			for (let {index, promise, zPromise} of promises) {
+				let result:PromiseSettledResult<T>|void;
 				try {
-					await promise;
-				} catch (_) {}
+					result = await promise;
+					output[index] = result;
+					zPromise.resolve(result);
+					/* c8 ignore next 3 */
+				} catch (e) {
+					reject(e);
+				}
 			}
 			this._running = false;
 			resolve(output);
