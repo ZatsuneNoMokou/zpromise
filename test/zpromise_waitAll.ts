@@ -6,32 +6,19 @@ chai.use(chaiAsPromised);
 
 
 
-var yes = function makeFulfilledResult(value) {
+const yes = function makeFulfilledResult<T>(value:T) {
 	return { status: 'fulfilled', value: value };
 };
-var no = function makeRejectedResult(reason) {
+const no = function makeRejectedResult<T>(reason:T) {
 	return { status: 'rejected', reason: reason };
 };
 
-var wrapForMap = function(promise, expectedValue) {
-	return [new Promise((resolve, reject) => {
-		promise
-			.then(data => {
-				resolve(Array.from(data.entries()))
-			})
-			.catch(reject)
-		;
-	}), Array.from(expectedValue.entries())];
-};
-
-
-
-
 
 describe('ZPromise.waitAll', function () {
-	var a = {a:Math.random()};
-	var b = {b:Math.random()};
-	var c = {c:Math.random()};
+	const a = {a:Math.random()},
+		b = {b:Math.random()},
+		c = {c:Math.random()}
+	;
 
 	it('all fulfilled', function () {
 		const map = new Map();
@@ -51,7 +38,7 @@ describe('ZPromise.waitAll', function () {
 		);
 	});
 
-	it('all rejected', function () {
+	it('all rejected', async function () {
 		const map = new Map();
 		map.set('lorem', Promise.reject(a));
 		map.set(true, Promise.reject(b));
@@ -62,11 +49,9 @@ describe('ZPromise.waitAll', function () {
 		expectedOutput.set('lorem', no(a));
 		expectedOutput.set(true, no(b));
 		expectedOutput.set(new Date(1000000000000), no(c));
-		return assert.eventually.deepEqual(
-			...wrapForMap(
-				ZPromise.waitAll(map),
-				expectedOutput
-			)
+		return assert.deepEqual(
+			await ZPromise.waitAll(map),
+			expectedOutput
 		);
 	});
 

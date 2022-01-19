@@ -5,22 +5,16 @@ import {Queue, ZPromise} from "../src/index.js";
 chai.use(chaiAsPromised);
 
 
-const yes = function makeFulfilledResult(value) {
+const yes = function makeFulfilledResult<T>(value:T):PromiseFulfilledResult<T> {
 	return {status: 'fulfilled', value: value};
 };
-const no = function makeRejectedResult(reason) {
+const no = function makeRejectedResult<T>(reason:T):PromiseRejectedResult {
 	return {status: 'rejected', reason: reason};
 };
 
-function sleep(ms) {
-	return new Promise(resolve => {
-		setTimeout(resolve, ms);
-	})
-}
-
-const randomInt = function () {
+function randomInt() {
 	return Math.floor(Math.random() * 100000)
-};
+}
 
 
 describe('Queue', function () {
@@ -35,6 +29,7 @@ describe('Queue', function () {
 	it('should throw because fn', function () {
 		return assert.throws(function () {
 			const q = new Queue();
+			// @ts-ignore
 			q.enqueue(null, "id")
 		}, /fn must be a function/)
 	});
@@ -67,8 +62,8 @@ describe('Queue', function () {
 			'limit': 4
 		});
 
-		function fn(i) {
-			return new Promise((resolve, reject) => {
+		function fn(i:number) {
+			return new Promise<string>((resolve, reject) => {
 				setTimeout(() => {
 					if (i % 2) {
 						resolve(i + ' ' + 100);
@@ -107,8 +102,8 @@ describe('Queue', function () {
 			'limit': 4
 		});
 
-		function fn(i) {
-			return new Promise((resolve, reject) => {
+		function fn(i:number) {
+			return new Promise<string>((resolve, reject) => {
 				setTimeout(() => {
 					if (i % 2) {
 						resolve(i + ' ' + 100);
@@ -119,7 +114,7 @@ describe('Queue', function () {
 			})
 		}
 
-		let promises = [];
+		let promises: Promise<PromiseSettledResult<unknown>>[] = [];
 		for (let i = 1; i <= 4; i++) {
 			setTimeout(() => {
 				promises.push(q.enqueue(fn, i));
@@ -139,6 +134,7 @@ describe('Queue', function () {
 		await ZPromise.wait(400);
 		const res = (await Promise.allSettled(promises))
 			.map(val => {
+				// @ts-ignore
 				return val.value ?? val.reason
 			})
 		;
@@ -213,15 +209,15 @@ describe('Queue', function () {
 		});
 
 
-		function fn(i) {
-			return new Promise(resolve => {
+		function fn(i:number) {
+			return new Promise<string>(resolve => {
 				setTimeout(()=> {
 					resolve(i + ' ' + 100);
 				}, 100);
 			})
 		}
 		for (let i=1;i<5;i++) {
-			q.enqueue(fn, ''+i, i);
+			q.enqueue(fn, i);
 		}
 		const p = q.run();
 
@@ -241,15 +237,15 @@ describe('Queue', function () {
 		});
 
 
-		function fn(i) {
-			return new Promise(resolve => {
+		function fn(i:number) {
+			return new Promise<string>(resolve => {
 				setTimeout(()=> {
 					resolve(i + ' ' + 100);
 				}, 100);
 			})
 		}
 		for (let i=1;i<5;i++) {
-			q.enqueue(fn, ''+i, i);
+			q.enqueue(fn, i);
 		}
 		const p = q.run();
 
@@ -274,6 +270,7 @@ describe('Queue', function () {
 
 		const promise = Promise.allSettled(promises)
 			.then(val => val.map(val => {
+				// @ts-ignore
 				return val.value ?? val.reason
 			}))
 		;
@@ -297,6 +294,7 @@ describe('Queue', function () {
 
 		const promise = Promise.allSettled(promises)
 			.then(val => val.map(val => {
+				// @ts-ignore
 				return val.value ?? val.reason
 			}))
 		;
@@ -309,7 +307,7 @@ describe('Queue', function () {
 	});
 
 	it('should enqueue function mixed results', function () {
-		const fn = Queue.enqueuedFunction(function fn(i) {
+		const fn = Queue.enqueuedFunction(function fn(i:number) {
 			if (i % 2) {
 				return Promise.resolve(i + ' ' + 100);
 			} else {
@@ -324,6 +322,7 @@ describe('Queue', function () {
 
 		const promise = Promise.allSettled(promises)
 			.then(val => val.map(val => {
+				// @ts-ignore
 				return val.value ?? val.reason
 			}))
 		;
@@ -336,6 +335,7 @@ describe('Queue', function () {
 	});
 
 	it('should throw runFunction with incorrect data', function () {
+		// @ts-ignore
 		const promise = Queue.runFunction(() => {});
 		return assert.isRejected(promise, /WrongType "data"/);
 	});

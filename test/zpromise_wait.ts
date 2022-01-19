@@ -6,23 +6,21 @@ const NS_PER_SEC = 1e9;
 chai.use(chaiAsPromised);
 
 describe('ZPromise.wait', function () {
-	it('should end before timeout', function () {
+	it('should end before timeout', async function () {
 		const targetTimeMs = 500;
 
-		const p = new Promise((resolve, reject) => {
+		const p = new Promise<number>((resolve, reject) => {
 			const startTime = process.hrtime();
 
 			ZPromise.wait(targetTimeMs)
 				.then(() => {
-					let duration = process.hrtime(startTime);
-					duration = duration[0] + duration[1] / NS_PER_SEC;
-					resolve(duration);
+					const duration = process.hrtime(startTime);
+					resolve(duration[0] + duration[1] / NS_PER_SEC);
 				})
 				.catch(reject)
 			;
 		});
 
-		this.timeout(1000);
-		return assert.eventually.isBelow(p, targetTimeMs / 1000 + 100)
+		return assert.isBelow(await p, targetTimeMs / 1000 + 100)
 	});
 });

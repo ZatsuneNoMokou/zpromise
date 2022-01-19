@@ -5,17 +5,17 @@ import {ZPromise} from "../src/ZPromise.js";
 chai.use(chaiAsPromised);
 
 
-var yes = function makeFulfilledResult(value) {
+var yes = function makeFulfilledResult<T>(value:T) {
 	return { status: 'fulfilled', value: value };
 };
-var no = function makeRejectedResult(reason) {
+var no = function makeRejectedResult<T>(reason:T) {
 	return { status: 'rejected', reason: reason };
 };
 
 describe('ZPromise.allSettled', function () {
-	var a = {};
-	var b = {};
-	var c = {};
+	var a:null = null;
+	var b = {z: "value"};
+	var c = true;
 
 	it('should be a function', function () {
 		assert.strictEqual(typeof ZPromise.allSettled, 'function')
