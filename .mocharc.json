@@ -1,0 +1,8 @@
+{
+	"check-leaks": true,
+	"enable-source-maps": true,
+	"extension": ["js","ts"],
+	"parallel": true,
+	"loader": "ts-node/esm",
+	"spec": ["test/**.{js,ts,jsx,tsx}"]
+}
